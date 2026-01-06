@@ -1,5 +1,6 @@
 package com.example.user_control.controller;
 
+import com.example.user_control.entity.Role;
 import com.example.user_control.entity.User;
 import com.example.user_control.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -42,5 +43,13 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
+    }
+
+    @PatchMapping("/{id}/role")
+    public User changeUserRole(
+            @PathVariable Long id,
+            @RequestParam Role role
+    ) {
+        return userService.changeRole(id, role);
     }
 }

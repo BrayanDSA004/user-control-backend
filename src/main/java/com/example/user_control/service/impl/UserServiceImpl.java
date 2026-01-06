@@ -69,4 +69,11 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
     }
+
+    @Override
+    public User changeRole(Long userId, Role role) {
+        User user = getUserById(userId);
+        user.setRole(role);
+        return userRepository.save(user);
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.user_control.service;
 
+import com.example.user_control.entity.Role;
 import com.example.user_control.entity.User;
 
 import java.util.List;
@@ -14,4 +15,6 @@ public interface UserService {
     User updateUser(Long id, User user);
 
     void deleteUser(long id);
+
+    User changeRole(Long userId, Role role);
 }
