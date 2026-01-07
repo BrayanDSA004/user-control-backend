@@ -1,20 +1,23 @@
 package com.example.user_control.service;
 
+import com.example.user_control.dto.request.UserCreateRequest;
+import com.example.user_control.dto.request.UserUpdateRequest;
+import com.example.user_control.dto.response.UserResponse;
 import com.example.user_control.entity.Role;
 import com.example.user_control.entity.User;
 
 import java.util.List;
 
 public interface UserService {
-    User createUser(User user);
+    UserResponse createUser(UserCreateRequest request);
 
-    User getUserById(Long id);
+    UserResponse getUserById(Long id);
 
-    List<User> getAllUsers();
+    List<UserResponse> getAllUsers();
 
-    User updateUser(Long id, User user);
+    UserResponse updateUser(Long id, UserUpdateRequest request);
 
     void deleteUser(long id);
 
-    User changeRole(Long userId, Role role);
+    UserResponse changeRole(Long userId, Role role);
 }

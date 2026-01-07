@@ -1,10 +1,16 @@
 package com.example.user_control.controller;
 
+import com.example.user_control.dto.request.UserCreateRequest;
+import com.example.user_control.dto.request.UserUpdateRequest;
+import com.example.user_control.dto.response.UserResponse;
 import com.example.user_control.entity.Role;
 import com.example.user_control.entity.User;
+import com.example.user_control.mapper.UserMapper;
 import com.example.user_control.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,30 +19,37 @@ import java.util.List;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
 
+
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public User createUSer(@RequestBody User user){
-        return userService.createUser(user);
+    public ResponseEntity<UserResponse> create(
+            @Valid @RequestBody UserCreateRequest request
+    ) {
+        UserResponse response = userService.createUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        UserResponse response = userService.getUserById(id);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        List<UserResponse> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 
     @PutMapping("/{id}")
-    public User updateUser(
+    public ResponseEntity<UserResponse> updateUser(
             @PathVariable Long id,
-            @RequestBody User user
+            @Valid @RequestBody UserUpdateRequest request
     ) {
-        return userService.updateUser(id, user);
+        UserResponse updated = userService.updateUser(id, request);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
@@ -46,10 +59,11 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/role")
-    public User changeUserRole(
+    public ResponseEntity<UserResponse> changeUserRole(
             @PathVariable Long id,
             @RequestParam Role role
     ) {
-        return userService.changeRole(id, role);
+        UserResponse updated = userService.changeRole(id, role);
+        return ResponseEntity.ok(updated);
     }
 }

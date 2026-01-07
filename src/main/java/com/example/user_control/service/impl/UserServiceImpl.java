@@ -1,8 +1,12 @@
 package com.example.user_control.service.impl;
 
 
+import com.example.user_control.dto.request.UserCreateRequest;
+import com.example.user_control.dto.request.UserUpdateRequest;
+import com.example.user_control.dto.response.UserResponse;
 import com.example.user_control.entity.Role;
 import com.example.user_control.entity.User;
+import com.example.user_control.mapper.UserMapper;
 import com.example.user_control.repository.UserRepository;
 import com.example.user_control.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,7 +26,9 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public User createUser(User user) {
+    public UserResponse createUser(UserCreateRequest request) {
+
+        User user = UserMapper.fromUserCreate(request);
 
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException("Email already in use");
@@ -36,44 +42,72 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        return userRepository.save(user);
+        user = userRepository.save(user);
+
+        return UserMapper.toResponse(user);
     }
 
     @Override
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(()-> new EntityNotFoundException("User not found"));
+    public UserResponse getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return UserMapper.toResponse(user);
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserMapper::toResponse)
+                .toList();
     }
 
     @Override
-    public User updateUser(Long id, User user) {
-        User existingUser = getUserById(id);
+    public UserResponse updateUser(Long id, UserUpdateRequest request) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        existingUser.setUsername(user.getUsername());
-        existingUser.setEmail(user.getEmail());
-        existingUser.setProfileImage(user.getProfileImage());
+        // Validar email SOLO si cambió
+        if (!existingUser.getEmail().equals(request.email())
+                && userRepository.existsByEmailAndIdNot(request.email(), id)) {
+            throw new IllegalArgumentException("Email already in use");
+        }
 
-        return userRepository.save(existingUser);
+        // Validar username SOLO si cambió
+        if (!existingUser.getUsername().equals(request.username())
+                && userRepository.existsByUsernameAndIdNot(request.username(), id)) {
+            throw new IllegalArgumentException("Username already in use");
+        }
+
+        existingUser.setUsername(request.username());
+        existingUser.setEmail(request.email());
+
+        if (request.profileImage() != null) {
+            existingUser.setProfileImage(request.profileImage());
+        }
+
+        if (request.password() != null && !request.password().isBlank()) {
+            existingUser.setPassword(passwordEncoder.encode(request.password()));
+        }
+
+        userRepository.save(existingUser);
+        return UserMapper.toResponse(existingUser);
     }
 
     @Override
     public void deleteUser(long id) {
-        User user = getUserById(id);
-
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setDeletedAt(LocalDateTime.now());
-
         userRepository.save(user);
     }
 
     @Override
-    public User changeRole(Long userId, Role role) {
-        User user = getUserById(userId);
+    public UserResponse changeRole(Long userId, Role role) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setRole(role);
-        return userRepository.save(user);
+        userRepository.save(user);
+        return UserMapper.toResponse(user);
     }
 }
