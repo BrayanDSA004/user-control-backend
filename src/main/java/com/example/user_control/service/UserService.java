@@ -5,6 +5,8 @@ import com.example.user_control.dto.request.UserUpdateRequest;
 import com.example.user_control.dto.response.UserResponse;
 import com.example.user_control.entity.Role;
 import com.example.user_control.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -13,7 +15,7 @@ public interface UserService {
 
     UserResponse getUserById(Long id);
 
-    List<UserResponse> getAllUsers();
+    Page<UserResponse> getAllUsers(Pageable pageable);
 
     UserResponse updateUser(Long id, UserUpdateRequest request);
 

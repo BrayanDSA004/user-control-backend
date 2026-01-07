@@ -9,6 +9,9 @@ import com.example.user_control.mapper.UserMapper;
 import com.example.user_control.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,9 +41,10 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        List<UserResponse> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<Page<UserResponse>> getAllUsers(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable
+    ) {
+        return ResponseEntity.ok(userService.getAllUsers(pageable));
     }
 
     @PutMapping("/{id}")
